@@ -24,7 +24,7 @@ public class OpenApiConfig {
                         .version("1.0"))
                 // ✅ SERVER URL (same as screenshot)
                 .servers(List.of(
-                        new Server().url("https://9240.408procr.amypo.ai/")
+                        new Server().url("")
                 ))
                 // ✅ JWT Bearer
                 .addSecurityItem(
