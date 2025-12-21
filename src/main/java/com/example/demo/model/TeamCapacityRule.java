@@ -9,5 +9,5 @@ public class TeamCapacityRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int maxLeavesPerDay;
+    private int maxLeaves;
 }
