@@ -1,20 +1,7 @@
-package com.example.demo.dto;
+public Map<String, Integer> getCapacityByDate() {
+    return capacityByDate;
+}
 
-import java.time.LocalDate;
-import java.util.Map;
-
-public class CapacityAnalysisResultDto {
-
-    private boolean risky;
-    private Map<LocalDate, Double> capacityByDate;
-
-    public CapacityAnalysisResultDto() {}
-
-    public CapacityAnalysisResultDto(boolean risky,
-                                     Map<LocalDate, Double> capacityByDate) {
-        this.risky = risky;
-        this.capacityByDate = capacityByDate;
-    }
-
-    // getters & setters
+public boolean isRisky() {
+    return risky;
 }
