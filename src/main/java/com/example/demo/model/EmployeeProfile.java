@@ -1,33 +1,69 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
+@Table(name = "employee_profiles")
 public class EmployeeProfile {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String employeeId;
-
-    private String fullName;
-
-    @Column(unique = true)
+    private String name;
     private String email;
-
     private String teamName;
-    private String role;
+    private Integer dailyCapacity;
 
-    private Boolean active = true;
+    public EmployeeProfile() {
+    }
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    public EmployeeProfile(Long id, String name, String email,
+                           String teamName, Integer dailyCapacity) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.teamName = teamName;
+        this.dailyCapacity = dailyCapacity;
+    }
 
-    @ManyToMany
-    private Set<EmployeeProfile> colleagues;
+    public Long getId() {
+        return id;
+    }
 
-    // getters & setters
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
+    }
+
+    public Integer getDailyCapacity() {
+        return dailyCapacity;
+    }
+
+    public void setDailyCapacity(Integer dailyCapacity) {
+        this.dailyCapacity = dailyCapacity;
+    }
 }
