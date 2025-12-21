@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.impl;
 
 import com.example.demo.dto.CapacityAnalysisResultDto;
 import com.example.demo.exception.ResourceNotFoundException;
@@ -10,6 +10,7 @@ import com.example.demo.repository.CapacityAlertRepository;
 import com.example.demo.repository.EmployeeProfileRepository;
 import com.example.demo.repository.LeaveRequestRepository;
 import com.example.demo.repository.TeamCapacityConfigRepository;
+import com.example.demo.service.CapacityAnalysisService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,7 +26,6 @@ public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
     private final TeamCapacityConfigRepository teamCapacityConfigRepository;
     private final CapacityAlertRepository capacityAlertRepository;
 
-    // ✅ Constructor injection (MANDATORY)
     public CapacityAnalysisServiceImpl(EmployeeProfileRepository employeeProfileRepository,
                                        LeaveRequestRepository leaveRequestRepository,
                                        TeamCapacityConfigRepository teamCapacityConfigRepository,
@@ -53,43 +53,48 @@ public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
         Map<LocalDate, Integer> availableCapacity = new HashMap<>();
         boolean alertGenerated = false;
 
-        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+        LocalDate currentDate = start;
 
-            int totalCapacity = employees.stream()
-                    .mapToInt(EmployeeProfile::getDailyCapacity)
-                    .sum();
+        while (!currentDate.isAfter(end)) {
 
-            int onLeaveCount = 0;
+            int totalCapacity = 0;
+            for (EmployeeProfile emp : employees) {
+                totalCapacity += emp.getDailyCapacity();
+            }
+
+            int onLeaveCapacity = 0;
 
             for (EmployeeProfile emp : employees) {
                 List<LeaveRequest> leaves =
                         leaveRequestRepository.findByEmployeeId(emp.getId());
 
-                boolean onLeave = leaves.stream().anyMatch(l ->
-                        !l.getStartDate().isAfter(date) &&
-                        !l.getEndDate().isBefore(date) &&
-                        "APPROVED".equals(l.getStatus())
-                );
+                for (LeaveRequest leave : leaves) {
+                    if ("APPROVED".equals(leave.getStatus())
+                            && !leave.getStartDate().isAfter(currentDate)
+                            && !leave.getEndDate().isBefore(currentDate)) {
 
-                if (onLeave) {
-                    onLeaveCount += emp.getDailyCapacity();
+                        onLeaveCapacity += emp.getDailyCapacity();
+                        break;
+                    }
                 }
             }
 
-            int remainingCapacity = totalCapacity - onLeaveCount;
-            availableCapacity.put(date, remainingCapacity);
+            int remainingCapacity = totalCapacity - onLeaveCapacity;
+            availableCapacity.put(currentDate, remainingCapacity);
 
             if (remainingCapacity < config.getMaxCapacity()) {
                 alertGenerated = true;
 
                 CapacityAlert alert = new CapacityAlert();
                 alert.setTeamName(teamName);
-                alert.setDate(date);
+                alert.setDate(currentDate);
                 alert.setAvailableCapacity(remainingCapacity);
                 alert.setMessage("Capacity below threshold");
 
                 capacityAlertRepository.save(alert);
             }
+
+            currentDate = currentDate.plusDays(1);
         }
 
         CapacityAnalysisResultDto result = new CapacityAnalysisResultDto();
