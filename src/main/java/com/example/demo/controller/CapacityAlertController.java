@@ -23,7 +23,7 @@ public class CapacityAlertController {
         this.capacityAlertRepository = capacityAlertRepository;
     }
 
-    // ✅ POST /api/capacity-alerts/analyze
+   
     @PostMapping("/analyze")
     public CapacityAnalysisResultDto analyze(
             @RequestParam String teamName,
@@ -33,7 +33,7 @@ public class CapacityAlertController {
         return capacityAnalysisService.analyzeTeamCapacity(teamName, start, end);
     }
 
-    // ✅ GET /api/capacity-alerts/team/{teamName}
+   
     @GetMapping("/team/{teamName}")
     public List<CapacityAlert> getByTeam(
             @PathVariable String teamName,
