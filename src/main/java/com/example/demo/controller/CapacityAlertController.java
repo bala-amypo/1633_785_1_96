@@ -4,7 +4,6 @@ import com.example.demo.dto.CapacityAnalysisResultDto;
 import com.example.demo.model.CapacityAlert;
 import com.example.demo.repository.CapacityAlertRepository;
 import com.example.demo.service.CapacityAnalysisService;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -17,7 +16,7 @@ public class CapacityAlertController {
     private final CapacityAnalysisService capacityAnalysisService;
     private final CapacityAlertRepository capacityAlertRepository;
 
-    // ✅ Constructor Injection (REQUIRED)
+    // ✅ Constructor Injection (MANDATORY for tests)
     public CapacityAlertController(CapacityAnalysisService capacityAnalysisService,
                                    CapacityAlertRepository capacityAlertRepository) {
         this.capacityAnalysisService = capacityAnalysisService;
@@ -26,7 +25,7 @@ public class CapacityAlertController {
 
     // ✅ POST /api/capacity-alerts/analyze
     @PostMapping("/analyze")
-    public CapacityAnalysisResultDto analyzeTeamCapacity(
+    public CapacityAnalysisResultDto analyze(
             @RequestParam String teamName,
             @RequestParam LocalDate start,
             @RequestParam LocalDate end) {
@@ -36,7 +35,7 @@ public class CapacityAlertController {
 
     // ✅ GET /api/capacity-alerts/team/{teamName}
     @GetMapping("/team/{teamName}")
-    public List<CapacityAlert> getAlertsByTeam(
+    public List<CapacityAlert> getByTeam(
             @PathVariable String teamName,
             @RequestParam LocalDate start,
             @RequestParam LocalDate end) {
