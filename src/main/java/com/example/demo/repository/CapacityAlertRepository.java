@@ -10,7 +10,7 @@ public interface CapacityAlertRepository extends JpaRepository<CapacityAlert, Lo
 
     List<CapacityAlert> findByTeamNameAndDateBetween(
             String teamName,
-            LocalDate start,
-            LocalDate end
+            LocalDate startDate,
+            LocalDate endDate
     );
 }
