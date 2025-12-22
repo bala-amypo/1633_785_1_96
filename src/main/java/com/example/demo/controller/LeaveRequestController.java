@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.LeaveRequestDto;
+import com.example.demo.model.LeaveRequest;
 import com.example.demo.service.LeaveRequestService;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,34 +10,29 @@ import java.util.List;
 @RequestMapping("/api/leaves")
 public class LeaveRequestController {
 
-    private final LeaveRequestService leaveRequestService;
+    private final LeaveRequestService leaveService;
 
-    // ✅ Constructor injection
-    public LeaveRequestController(LeaveRequestService leaveRequestService) {
-        this.leaveRequestService = leaveRequestService;
+    public LeaveRequestController(LeaveRequestService leaveService) {
+        this.leaveService = leaveService;
     }
 
-    // POST /api/leaves
     @PostMapping
-    public LeaveRequestDto create(@RequestBody LeaveRequestDto dto) {
-        return leaveRequestService.create(dto);
+    public LeaveRequest submitLeave(@RequestBody LeaveRequest leaveRequest) {
+        return leaveService.create(leaveRequest);
     }
 
-    // PUT /api/leaves/{id}/approve
     @PutMapping("/{id}/approve")
-    public LeaveRequestDto approve(@PathVariable Long id) {
-        return leaveRequestService.approve(id);
+    public LeaveRequest approveLeave(@PathVariable Long id) {
+        return leaveService.approve(id);
     }
 
-    // PUT /api/leaves/{id}/reject
     @PutMapping("/{id}/reject")
-    public LeaveRequestDto reject(@PathVariable Long id) {
-        return leaveRequestService.reject(id);
+    public LeaveRequest rejectLeave(@PathVariable Long id) {
+        return leaveService.reject(id);
     }
 
-    // GET /api/leaves/employee/{id}
-    @GetMapping("/employee/{id}")
-    public List<LeaveRequestDto> getByEmployee(@PathVariable Long id) {
-        return leaveRequestService.getByEmployee(id);
+    @GetMapping("/employee/{employeeId}")
+    public List<LeaveRequest> getLeavesByEmployee(@PathVariable Long employeeId) {
+        return leaveService.getByEmployee(employeeId);
     }
 }

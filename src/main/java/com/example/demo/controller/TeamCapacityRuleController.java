@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.TeamCapacityConfig;
+import com.example.demo.model.TeamCapacityRule;
 import com.example.demo.service.TeamCapacityRuleService;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,22 +8,25 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/capacity-rules")
 public class TeamCapacityRuleController {
 
-    private final TeamCapacityRuleService teamCapacityRuleService;
+    private final TeamCapacityRuleService capacityRuleService;
 
-    // ✅ Constructor injection
-    public TeamCapacityRuleController(TeamCapacityRuleService teamCapacityRuleService) {
-        this.teamCapacityRuleService = teamCapacityRuleService;
+    public TeamCapacityRuleController(TeamCapacityRuleService capacityRuleService) {
+        this.capacityRuleService = capacityRuleService;
     }
 
-    // POST /api/capacity-rules
     @PostMapping
-    public TeamCapacityConfig create(@RequestBody TeamCapacityConfig rule) {
-        return teamCapacityRuleService.createRule(rule);
+    public TeamCapacityRule createRule(@RequestBody TeamCapacityRule rule) {
+        return capacityRuleService.create(rule);
     }
 
-    // GET /api/capacity-rules/team/{teamName}
+    @PutMapping("/{id}")
+    public TeamCapacityRule updateRule(@PathVariable Long id,
+                                       @RequestBody TeamCapacityRule rule) {
+        return capacityRuleService.update(id, rule);
+    }
+
     @GetMapping("/team/{teamName}")
-    public TeamCapacityConfig getByTeam(@PathVariable String teamName) {
-        return teamCapacityRuleService.getRuleByTeam(teamName);
+    public TeamCapacityRule getRuleByTeam(@PathVariable String teamName) {
+        return capacityRuleService.getByTeam(teamName);
     }
 }

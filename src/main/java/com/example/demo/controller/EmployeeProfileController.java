@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.EmployeeProfileDto;
+import com.example.demo.model.EmployeeProfile;
 import com.example.demo.service.EmployeeProfileService;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,35 +10,30 @@ import java.util.List;
 @RequestMapping("/api/employees")
 public class EmployeeProfileController {
 
-    private final EmployeeProfileService employeeProfileService;
+    private final EmployeeProfileService employeeService;
 
-    // ✅ Constructor injection (MANDATORY)
-    public EmployeeProfileController(EmployeeProfileService employeeProfileService) {
-        this.employeeProfileService = employeeProfileService;
+    public EmployeeProfileController(EmployeeProfileService employeeService) {
+        this.employeeService = employeeService;
     }
 
-    // POST /api/employees
     @PostMapping
-    public EmployeeProfileDto create(@RequestBody EmployeeProfileDto dto) {
-        return employeeProfileService.create(dto);
+    public EmployeeProfile createEmployee(@RequestBody EmployeeProfile employee) {
+        return employeeService.create(employee);
     }
 
-    // PUT /api/employees/{id}
     @PutMapping("/{id}")
-    public EmployeeProfileDto update(@PathVariable Long id,
-                                     @RequestBody EmployeeProfileDto dto) {
-        return employeeProfileService.update(id, dto);
+    public EmployeeProfile updateEmployee(@PathVariable Long id,
+                                          @RequestBody EmployeeProfile employee) {
+        return employeeService.update(id, employee);
     }
 
-    // GET /api/employees/{id}
     @GetMapping("/{id}")
-    public EmployeeProfileDto getById(@PathVariable Long id) {
-        return employeeProfileService.getById(id);
+    public EmployeeProfile getEmployee(@PathVariable Long id) {
+        return employeeService.getById(id);
     }
 
-    // GET /api/employees/team/{teamName}
     @GetMapping("/team/{teamName}")
-    public List<EmployeeProfileDto> getByTeam(@PathVariable String teamName) {
-        return employeeProfileService.getByTeam(teamName);
+    public List<EmployeeProfile> getEmployeesByTeam(@PathVariable String teamName) {
+        return employeeService.getByTeam(teamName);
     }
 }
