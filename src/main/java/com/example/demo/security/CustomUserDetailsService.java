@@ -15,7 +15,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserAccountRepository userAccountRepository;
 
-  
+    // ✅ Constructor injection (REQUIRED)
     public CustomUserDetailsService(UserAccountRepository userAccountRepository) {
         this.userAccountRepository = userAccountRepository;
     }
