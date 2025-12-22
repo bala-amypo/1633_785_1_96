@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
+import com.example.demo.model.UserAccount;
 import com.example.demo.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,20 +10,18 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // ✅ Constructor injection
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
-    // POST /auth/register
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody AuthRequest request) {
-        return authService.register(request);
+    public UserAccount register(@RequestBody UserAccount user) {
+        return authService.register(user);
     }
 
-    // POST /auth/login
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        return authService.authenticate(request);
+    public UserAccount login(@RequestParam String username,
+                             @RequestParam String password) {
+        return authService.login(username, password);
     }
 }
