@@ -16,7 +16,7 @@ public class CapacityAlertController {
     private final CapacityAnalysisService capacityAnalysisService;
     private final CapacityAlertRepository capacityAlertRepository;
 
-    // ✅ Constructor Injection (MANDATORY for tests)
+  
     public CapacityAlertController(CapacityAnalysisService capacityAnalysisService,
                                    CapacityAlertRepository capacityAlertRepository) {
         this.capacityAnalysisService = capacityAnalysisService;

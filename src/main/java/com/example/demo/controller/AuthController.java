@@ -11,18 +11,18 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // ✅ Constructor injection
+    
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
-    // POST /auth/register
+ 
     @PostMapping("/register")
     public AuthResponse register(@RequestBody AuthRequest request) {
         return authService.register(request);
     }
 
-    // POST /auth/login
+    
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest request) {
         return authService.authenticate(request);
