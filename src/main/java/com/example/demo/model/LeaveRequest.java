@@ -4,45 +4,29 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "leave_requests")
 public class LeaveRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long employeeId;
+    @ManyToOne
+    private EmployeeProfile employee;
+
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
-
-    public LeaveRequest() {
-    }
-
-    public LeaveRequest(Long id, Long employeeId,
-                        LocalDate startDate, LocalDate endDate,
-                        String status) {
-        this.id = id;
-        this.employeeId = employeeId;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.status = status;
-    }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public EmployeeProfile getEmployee() {
+        return employee;
     }
 
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
+    public void setEmployee(EmployeeProfile employee) {
+        this.employee = employee;
     }
 
     public LocalDate getStartDate() {

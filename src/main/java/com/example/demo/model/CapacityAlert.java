@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "capacity_alerts")
 public class CapacityAlert {
 
     @Id
@@ -13,28 +12,11 @@ public class CapacityAlert {
 
     private String teamName;
     private LocalDate date;
-    private Integer availableCapacity;
+    private String severity;
     private String message;
-
-    public CapacityAlert() {
-    }
-
-    public CapacityAlert(Long id, String teamName,
-                         LocalDate date, Integer availableCapacity,
-                         String message) {
-        this.id = id;
-        this.teamName = teamName;
-        this.date = date;
-        this.availableCapacity = availableCapacity;
-        this.message = message;
-    }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTeamName() {
@@ -53,12 +35,12 @@ public class CapacityAlert {
         this.date = date;
     }
 
-    public Integer getAvailableCapacity() {
-        return availableCapacity;
+    public String getSeverity() {
+        return severity;
     }
 
-    public void setAvailableCapacity(Integer availableCapacity) {
-        this.availableCapacity = availableCapacity;
+    public void setSeverity(String severity) {   // 🔥 REQUIRED
+        this.severity = severity;
     }
 
     public String getMessage() {

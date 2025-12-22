@@ -3,7 +3,6 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "employee_profiles")
 public class EmployeeProfile {
 
     @Id
@@ -13,19 +12,7 @@ public class EmployeeProfile {
     private String name;
     private String email;
     private String teamName;
-    private Integer dailyCapacity;
-
-    public EmployeeProfile() {
-    }
-
-    public EmployeeProfile(Long id, String name, String email,
-                           String teamName, Integer dailyCapacity) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.teamName = teamName;
-        this.dailyCapacity = dailyCapacity;
-    }
+    private boolean active;
 
     public Long getId() {
         return id;
@@ -59,11 +46,11 @@ public class EmployeeProfile {
         this.teamName = teamName;
     }
 
-    public Integer getDailyCapacity() {
-        return dailyCapacity;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setDailyCapacity(Integer dailyCapacity) {
-        this.dailyCapacity = dailyCapacity;
+    public void setActive(boolean active) {   // 🔥 REQUIRED
+        this.active = active;
     }
 }
