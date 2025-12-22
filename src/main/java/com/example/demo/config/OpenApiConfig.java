@@ -24,7 +24,7 @@ public class OpenApiConfig {
                         .version("1.0"))
              
                 .servers(List.of(
-                        new Server().url("https://9557.408procr.amypo.ai/login")
+                        new Server().url("https://9557.408procr.amypo.ai/")
                 ))
               
                 .addSecurityItem(
