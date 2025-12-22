@@ -1,72 +1,55 @@
-package com.example.demo.service;
+package com.example.demo.service.impl;
 
-import com.example.demo.dto.LeaveRequestDto;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.LeaveRequest;
 import com.example.demo.repository.LeaveRequestRepository;
+import com.example.demo.service.LeaveRequestService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
-    private final LeaveRequestRepository leaveRequestRepository;
+    private final LeaveRequestRepository repository;
 
-    public LeaveRequestServiceImpl(LeaveRequestRepository leaveRequestRepository) {
-        this.leaveRequestRepository = leaveRequestRepository;
+    public LeaveRequestServiceImpl(LeaveRequestRepository repository) {
+        this.repository = repository;
     }
 
     @Override
-    public LeaveRequestDto create(LeaveRequestDto dto) {
+    public LeaveRequest create(LeaveRequest leaveRequest) {
 
-        LeaveRequest leave = new LeaveRequest();
-        leave.setEmployeeId(dto.getEmployeeId());
-        leave.setStartDate(dto.getStartDate());
-        leave.setEndDate(dto.getEndDate());
-        leave.setStatus("PENDING");
+        if (leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())) {
+            throw new BadRequestException("Invalid Date Range: Start date after end date");
+        }
 
-        return toDto(leaveRequestRepository.save(leave));
+        leaveRequest.setStatus("PENDING");
+        return repository.save(leaveRequest);
     }
 
     @Override
-    public LeaveRequestDto approve(Long id) {
-
+    public LeaveRequest approve(Long id) {
         LeaveRequest leave = getLeave(id);
         leave.setStatus("APPROVED");
-        return toDto(leaveRequestRepository.save(leave));
+        return repository.save(leave);
     }
 
     @Override
-    public LeaveRequestDto reject(Long id) {
-
+    public LeaveRequest reject(Long id) {
         LeaveRequest leave = getLeave(id);
         leave.setStatus("REJECTED");
-        return toDto(leaveRequestRepository.save(leave));
+        return repository.save(leave);
     }
 
     @Override
-    public List<LeaveRequestDto> getByEmployee(Long employeeId) {
-
-        return leaveRequestRepository.findByEmployeeId(employeeId)
-                .stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+    public List<LeaveRequest> getByEmployee(Long employeeId) {
+        return repository.findByEmployee_Id(employeeId);
     }
 
     private LeaveRequest getLeave(Long id) {
-        return leaveRequestRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
-    }
-
-    private LeaveRequestDto toDto(LeaveRequest leave) {
-        return new LeaveRequestDto(
-                leave.getId(),
-                leave.getEmployeeId(),
-                leave.getStartDate(),
-                leave.getEndDate(),
-                leave.getStatus()
-        );
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found"));
     }
 }

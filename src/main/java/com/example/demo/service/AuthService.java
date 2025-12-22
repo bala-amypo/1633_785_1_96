@@ -1,11 +1,10 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
+import com.example.demo.model.UserAccount;
 
 public interface AuthService {
 
-    AuthResponse register(AuthRequest request);
+    UserAccount register(UserAccount user);
 
-    AuthResponse authenticate(AuthRequest request);
+    UserAccount login(String username, String password);
 }

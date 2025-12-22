@@ -1,14 +1,13 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.CapacityAnalysisResultDto;
+import com.example.demo.model.CapacityAlert;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface CapacityAnalysisService {
 
-    CapacityAnalysisResultDto analyzeTeamCapacity(
-            String teamName,
-            LocalDate start,
-            LocalDate end
-    );
+    List<CapacityAlert> analyze(String teamName, LocalDate startDate, LocalDate endDate);
+
+    List<CapacityAlert> getAlertsByTeam(String teamName);
 }

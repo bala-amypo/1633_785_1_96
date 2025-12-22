@@ -1,109 +1,71 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.CapacityAnalysisResultDto;
-import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.model.CapacityAlert;
-import com.example.demo.model.EmployeeProfile;
 import com.example.demo.model.LeaveRequest;
-import com.example.demo.model.TeamCapacityConfig;
+import com.example.demo.model.TeamCapacityRule;
 import com.example.demo.repository.CapacityAlertRepository;
-import com.example.demo.repository.EmployeeProfileRepository;
 import com.example.demo.repository.LeaveRequestRepository;
-import com.example.demo.repository.TeamCapacityConfigRepository;
 import com.example.demo.service.CapacityAnalysisService;
+import com.example.demo.service.TeamCapacityRuleService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
 
-    private final EmployeeProfileRepository employeeProfileRepository;
-    private final LeaveRequestRepository leaveRequestRepository;
-    private final TeamCapacityConfigRepository teamCapacityConfigRepository;
-    private final CapacityAlertRepository capacityAlertRepository;
+    private final LeaveRequestRepository leaveRepository;
+    private final CapacityAlertRepository alertRepository;
+    private final TeamCapacityRuleService ruleService;
 
-    public CapacityAnalysisServiceImpl(EmployeeProfileRepository employeeProfileRepository,
-                                       LeaveRequestRepository leaveRequestRepository,
-                                       TeamCapacityConfigRepository teamCapacityConfigRepository,
-                                       CapacityAlertRepository capacityAlertRepository) {
-        this.employeeProfileRepository = employeeProfileRepository;
-        this.leaveRequestRepository = leaveRequestRepository;
-        this.teamCapacityConfigRepository = teamCapacityConfigRepository;
-        this.capacityAlertRepository = capacityAlertRepository;
+    public CapacityAnalysisServiceImpl(LeaveRequestRepository leaveRepository,
+                                       CapacityAlertRepository alertRepository,
+                                       TeamCapacityRuleService ruleService) {
+        this.leaveRepository = leaveRepository;
+        this.alertRepository = alertRepository;
+        this.ruleService = ruleService;
     }
 
     @Override
-    public CapacityAnalysisResultDto analyzeTeamCapacity(
-            String teamName,
-            LocalDate start,
-            LocalDate end) {
+    public List<CapacityAlert> analyze(String teamName, LocalDate startDate, LocalDate endDate) {
 
-        TeamCapacityConfig config = teamCapacityConfigRepository
-                .findByTeamName(teamName)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Capacity rule not found"));
-
-        List<EmployeeProfile> employees =
-                employeeProfileRepository.findByTeamName(teamName);
-
-        Map<LocalDate, Integer> availableCapacity = new HashMap<>();
-        boolean alertGenerated = false;
-
-        LocalDate currentDate = start;
-
-        while (!currentDate.isAfter(end)) {
-
-            int totalCapacity = 0;
-            for (EmployeeProfile emp : employees) {
-                totalCapacity += emp.getDailyCapacity();
-            }
-
-            int onLeaveCapacity = 0;
-
-            for (EmployeeProfile emp : employees) {
-                List<LeaveRequest> leaves =
-                        leaveRequestRepository.findByEmployeeId(emp.getId());
-
-                for (LeaveRequest leave : leaves) {
-                    if ("APPROVED".equals(leave.getStatus())
-                            && !leave.getStartDate().isAfter(currentDate)
-                            && !leave.getEndDate().isBefore(currentDate)) {
-
-                        onLeaveCapacity += emp.getDailyCapacity();
-                        break;
-                    }
-                }
-            }
-
-            int remainingCapacity = totalCapacity - onLeaveCapacity;
-            availableCapacity.put(currentDate, remainingCapacity);
-
-            if (remainingCapacity < config.getMaxCapacity()) {
-                alertGenerated = true;
-
-                CapacityAlert alert = new CapacityAlert();
-                alert.setTeamName(teamName);
-                alert.setDate(currentDate);
-                alert.setAvailableCapacity(remainingCapacity);
-                alert.setMessage("Capacity below threshold");
-
-                capacityAlertRepository.save(alert);
-            }
-
-            currentDate = currentDate.plusDays(1);
+        if (startDate.isAfter(endDate)) {
+            throw new BadRequestException("Invalid Date Range: Start date after end date");
         }
 
-        CapacityAnalysisResultDto result = new CapacityAnalysisResultDto();
-        result.setTeamName(teamName);
-        result.setStartDate(start);
-        result.setEndDate(end);
-        result.setAvailableCapacity(availableCapacity);
-        result.setAlertGenerated(alertGenerated);
+        TeamCapacityRule rule = ruleService.getByTeam(teamName);
 
-        return result;
+        List<LeaveRequest> approvedLeaves =
+                leaveRepository.findByEmployee_TeamNameAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                        teamName, "APPROVED", endDate, startDate
+                );
+
+        int unavailable = approvedLeaves.size();
+        double percentUnavailable =
+                ((double) unavailable / rule.getTotalHeadcount()) * 100;
+
+        List<CapacityAlert> alerts = new ArrayList<>();
+
+        if (percentUnavailable >= rule.getMinCapacityPercent()) {
+            CapacityAlert alert = new CapacityAlert();
+            alert.setTeamName(teamName);
+            alert.setDate(startDate);
+            alert.setSeverity("HIGH");
+            alert.setMessage("Team capacity exceeded threshold");
+
+            alerts.add(alertRepository.save(alert));
+        }
+
+        return alerts;
+    }
+
+    @Override
+    public List<CapacityAlert> getAlertsByTeam(String teamName) {
+        return alertRepository.findByTeamNameAndDateBetween(
+                teamName, LocalDate.MIN, LocalDate.MAX
+        );
     }
 }
