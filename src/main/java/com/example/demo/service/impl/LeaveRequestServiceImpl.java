@@ -1,72 +1,81 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.LeaveRequestDto;
-import com.example.demo.exception.*;
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
-import com.example.demo.service.LeaveRequestService;
+import com.example.demo.dto.CapacityAnalysisResultDto;
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.CapacityAlert;
+import com.example.demo.model.LeaveRequest;
+import com.example.demo.model.TeamCapacityConfig;
+import com.example.demo.repository.CapacityAlertRepository;
+import com.example.demo.repository.EmployeeProfileRepository;
+import com.example.demo.repository.LeaveRequestRepository;
+import com.example.demo.repository.TeamCapacityConfigRepository;
+import com.example.demo.service.CapacityAnalysisService;
+import com.example.demo.util.DateRangeUtil;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-public class LeaveRequestServiceImpl implements LeaveRequestService {
+@Service
+public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
 
-    private final LeaveRequestRepository repo;
-    private final EmployeeProfileRepository empRepo;
+    private final TeamCapacityConfigRepository capacityRepo;
+    private final EmployeeProfileRepository employeeRepo;
+    private final LeaveRequestRepository leaveRepo;
+    private final CapacityAlertRepository alertRepo;
 
-    public LeaveRequestServiceImpl(LeaveRequestRepository r, EmployeeProfileRepository e) {
-        this.repo = r;
-        this.empRepo = e;
+    public CapacityAnalysisServiceImpl(TeamCapacityConfigRepository capacityRepo,
+                                       EmployeeProfileRepository employeeRepo,
+                                       LeaveRequestRepository leaveRepo,
+                                       CapacityAlertRepository alertRepo) {
+        this.capacityRepo = capacityRepo;
+        this.employeeRepo = employeeRepo;
+        this.leaveRepo = leaveRepo;
+        this.alertRepo = alertRepo;
     }
 
-    public LeaveRequestDto create(LeaveRequestDto dto) {
-        if (dto.getStartDate().isAfter(dto.getEndDate()))
-            throw new BadRequestException("Invalid dates");
+    @Override
+    public CapacityAnalysisResultDto analyzeTeamCapacity(String teamName, LocalDate start, LocalDate end) {
+        if (start.isAfter(end)) {
+            throw new BadRequestException("Start date must not be after end date");
+        }
 
-        EmployeeProfile emp = empRepo.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        TeamCapacityConfig config = capacityRepo.findByTeamName(teamName)
+                .orElseThrow(() -> new ResourceNotFoundException("Capacity config not found for team: " + teamName));
 
-        LeaveRequest l = new LeaveRequest();
-        l.setEmployee(emp);
-        l.setStartDate(dto.getStartDate());
-        l.setEndDate(dto.getEndDate());
-        l.setType(dto.getType());
-        l.setStatus("PENDING");
+        if (config.getTotalHeadcount() <= 0) {
+            throw new BadRequestException("Invalid total headcount: " + config.getTotalHeadcount());
+        }
 
-        repo.save(l);
-        dto.setId(l.getId());
-        dto.setStatus("PENDING");
-        return dto;
-    }
+        List<LocalDate> dates = DateRangeUtil.daysBetween(start, end);
+        Map<LocalDate, Integer> capacityMap = new HashMap<>();
+        boolean risky = false;
 
-    public LeaveRequestDto approve(Long id) {
-        LeaveRequest l = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
-        l.setStatus("APPROVED");
-        repo.save(l);
-        LeaveRequestDto d = new LeaveRequestDto();
-        d.setStatus("APPROVED");
-        return d;
-    }
+        for (LocalDate date : dates) {
+            List<LeaveRequest> overlapping = leaveRepo.findApprovedOverlappingForTeam(teamName, date, date);
+            int onLeave = overlapping.size();
+            int available = config.getTotalHeadcount() - onLeave;
+            int percent = (int) ((available * 100.0) / config.getTotalHeadcount());
 
-    public LeaveRequestDto reject(Long id) {
-        LeaveRequest l = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
-        l.setStatus("REJECTED");
-        repo.save(l);
-        LeaveRequestDto d = new LeaveRequestDto();
-        d.setStatus("REJECTED");
-        return d;
-    }
+            capacityMap.put(date, percent);
 
-    public List<LeaveRequestDto> getByEmployee(Long id) {
-        EmployeeProfile emp = empRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
-        return repo.findByEmployee(emp).stream().map(l -> new LeaveRequestDto()).collect(Collectors.toList());
-    }
+            if (percent < config.getMinCapacityPercent()) {
+                risky = true;
+                String severity = percent < config.getMinCapacityPercent() - 20 ? "HIGH" :
+                                  percent < config.getMinCapacityPercent() - 10 ? "MEDIUM" : "LOW";
+                CapacityAlert alert = new CapacityAlert(teamName, date, severity,
+                        "Capacity dropped to " + percent + "% on " + date);
+                alertRepo.save(alert);
+            }
+        }
 
-    public List<LeaveRequestDto> getOverlappingForTeam(String team, LocalDate s, LocalDate e) {
-        return repo.findApprovedOverlappingForTeam(team, s, e)
-                .stream().map(l -> new LeaveRequestDto()).collect(Collectors.toList());
+        CapacityAnalysisResultDto result = new CapacityAnalysisResultDto();
+        result.setRisky(risky);
+        result.setCapacityByDate(capacityMap);
+        result.setMessage(risky ? "Team capacity risk detected" : "Team capacity healthy");
+        return result;
     }
 }
