@@ -1,71 +1,105 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.CapacityAnalysisResultDto;
+import com.example.demo.dto.LeaveRequestDto;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.model.CapacityAlert;
+import com.example.demo.model.EmployeeProfile;
 import com.example.demo.model.LeaveRequest;
-import com.example.demo.model.TeamCapacityConfig;
-import com.example.demo.repository.CapacityAlertRepository;
 import com.example.demo.repository.EmployeeProfileRepository;
 import com.example.demo.repository.LeaveRequestRepository;
-import com.example.demo.repository.TeamCapacityConfigRepository;
-import com.example.demo.service.CapacityAnalysisService;
-import com.example.demo.util.DateRangeUtil;
-import org.springframework.stereotype.Service;
+import com.example.demo.service.LeaveRequestService;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
-@Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
-    private final TeamCapacityConfigRepository capacityRepo;
-    private final EmployeeProfileRepository employeeRepo;
     private final LeaveRequestRepository leaveRepo;
-    private final CapacityAlertRepository alertRepo;
+    private final EmployeeProfileRepository employeeRepo;
+
+    public LeaveRequestServiceImpl(LeaveRequestRepository leaveRepo,
+                                   EmployeeProfileRepository employeeRepo) {
+        this.leaveRepo = leaveRepo;
+        this.employeeRepo = employeeRepo;
+    }
 
     @Override
-    public CapacityAnalysisResultDto analyzeTeamCapacity(String teamName, LocalDate start, LocalDate end) {
-        if (start.isAfter(end)) {
-            throw new BadRequestException("Start date must not be after end date");
+    public LeaveRequestDto create(LeaveRequestDto dto) {
+        if (dto.getStartDate().isAfter(dto.getEndDate())) {
+            throw new BadRequestException("Invalid date range");
         }
 
-        TeamCapacityConfig config = capacityRepo.findByTeamName(teamName)
-                .orElseThrow(() -> new ResourceNotFoundException("Capacity config not found for team: " + teamName));
+        EmployeeProfile emp = employeeRepo.findById(dto.getEmployeeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
-        if (config.getTotalHeadcount() <= 0) {
-            throw new BadRequestException("Invalid total headcount: " + config.getTotalHeadcount());
-        }
+        LeaveRequest l = new LeaveRequest();
+        l.setEmployee(emp);
+        l.setStartDate(dto.getStartDate());
+        l.setEndDate(dto.getEndDate());
+        l.setType(dto.getType());
+        l.setStatus("PENDING");
 
-        List<LocalDate> dates = DateRangeUtil.daysBetween(start, end);
-        Map<LocalDate, Integer> capacityMap = new HashMap<>();
-        boolean risky = false;
+        LeaveRequest saved = leaveRepo.save(l);
 
-        for (LocalDate date : dates) {
-            List<LeaveRequest> overlapping = leaveRepo.findApprovedOverlappingForTeam(teamName, date, date);
-            int onLeave = overlapping.size();
-            int available = config.getTotalHeadcount() - onLeave;
-            int percent = (int) ((available * 100.0) / config.getTotalHeadcount());
+        dto.setId(saved.getId());
+        dto.setStatus("PENDING");
+        return dto;
+    }
 
-            capacityMap.put(date, percent);
+    @Override
+    public LeaveRequestDto approve(Long id) {
+        LeaveRequest l = leaveRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
+        l.setStatus("APPROVED");
+        leaveRepo.save(l);
 
-            if (percent < config.getMinCapacityPercent()) {
-                risky = true;
-                String severity = percent < config.getMinCapacityPercent() - 20 ? "HIGH" :
-                                  percent < config.getMinCapacityPercent() - 10 ? "MEDIUM" : "LOW";
-                CapacityAlert alert = new CapacityAlert(teamName, date, severity,
-                        "Capacity dropped to " + percent + "% on " + date);
-                alertRepo.save(alert);
-            }
-        }
+        LeaveRequestDto dto = new LeaveRequestDto();
+        dto.setId(l.getId());
+        dto.setStatus("APPROVED");
+        return dto;
+    }
 
-        CapacityAnalysisResultDto result = new CapacityAnalysisResultDto();
-        result.setRisky(risky);
-        result.setCapacityByDate(capacityMap);
-        result.setMessage(risky ? "Team capacity risk detected" : "Team capacity healthy");
-        return result;
+    @Override
+    public LeaveRequestDto reject(Long id) {
+        LeaveRequest l = leaveRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
+        l.setStatus("REJECTED");
+        leaveRepo.save(l);
+
+        LeaveRequestDto dto = new LeaveRequestDto();
+        dto.setId(l.getId());
+        dto.setStatus("REJECTED");
+        return dto;
+    }
+
+    @Override
+    public List<LeaveRequestDto> getByEmployee(Long employeeId) {
+        EmployeeProfile emp = employeeRepo.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        return leaveRepo.findByEmployee(emp)
+                .stream()
+                .map(l -> {
+                    LeaveRequestDto d = new LeaveRequestDto();
+                    d.setId(l.getId());
+                    d.setStatus(l.getStatus());
+                    return d;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LeaveRequestDto> getOverlappingForTeam(String team,
+                                                       LocalDate start,
+                                                       LocalDate end) {
+        return leaveRepo.findApprovedOverlappingForTeam(team, start, end)
+                .stream()
+                .map(l -> {
+                    LeaveRequestDto d = new LeaveRequestDto();
+                    d.setId(l.getId());
+                    return d;
+                })
+                .collect(Collectors.toList());
     }
 }
