@@ -13,7 +13,6 @@ public class TeamCapacityConfig {
     private int totalHeadcount;
     private int minCapacityPercent;
 
-    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -21,8 +20,12 @@ public class TeamCapacityConfig {
     public void setTeamName(String teamName) { this.teamName = teamName; }
 
     public int getTotalHeadcount() { return totalHeadcount; }
-    public void setTotalHeadcount(int totalHeadcount) { this.totalHeadcount = totalHeadcount; }
+    public void setTotalHeadcount(int totalHeadcount) {
+        this.totalHeadcount = totalHeadcount;
+    }
 
     public int getMinCapacityPercent() { return minCapacityPercent; }
-    public void setMinCapacityPercent(int minCapacityPercent) { this.minCapacityPercent = minCapacityPercent; }
+    public void setMinCapacityPercent(int minCapacityPercent) {
+        this.minCapacityPercent = minCapacityPercent;
+    }
 }
