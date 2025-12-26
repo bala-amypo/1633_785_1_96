@@ -11,8 +11,9 @@ public class LeaveRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String employeeId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "employee_id_fk")
+    private EmployeeProfile employee;
 
     @Column(nullable = false)
     private String teamName;
@@ -27,13 +28,12 @@ public class LeaveRequest {
     private String type;
 
     @Column(nullable = false)
-    private String status;
+    private String status; // APPROVED / PENDING / REJECTED
 
-    // -------- Constructors --------
-    public LeaveRequest() {
-    }
+    // ---------- Constructors ----------
+    public LeaveRequest() {}
 
-    // -------- Getters & Setters --------
+    // ---------- Getters & Setters ----------
     public Long getId() {
         return id;
     }
@@ -42,12 +42,12 @@ public class LeaveRequest {
         this.id = id;
     }
 
-    public String getEmployeeId() {
-        return employeeId;
+    public EmployeeProfile getEmployee() {
+        return employee;
     }
 
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
+    public void setEmployee(EmployeeProfile employee) {
+        this.employee = employee;
     }
 
     public String getTeamName() {
