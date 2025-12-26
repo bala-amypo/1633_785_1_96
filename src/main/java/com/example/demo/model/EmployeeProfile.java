@@ -13,19 +13,19 @@ public class EmployeeProfile {
     @Column(nullable = false, unique = true)
     private String employeeId;
 
-    private String fullName;
-    private String email;
-    private String teamName;
-    private String role;
+    @Column(nullable = false)
+    private String name;
 
     @Column(nullable = false)
-    private boolean active = true;
+    private String teamName;
 
-    // -------- Constructors --------
-    public EmployeeProfile() {
-    }
+    @Column(nullable = false)
+    private boolean active;
 
-    // -------- Getters & Setters --------
+    // ---------- Constructors ----------
+    public EmployeeProfile() {}
+
+    // ---------- Getters & Setters ----------
     public Long getId() {
         return id;
     }
@@ -42,20 +42,12 @@ public class EmployeeProfile {
         this.employeeId = employeeId;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getName() {
+        return name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getTeamName() {
@@ -64,14 +56,6 @@ public class EmployeeProfile {
 
     public void setTeamName(String teamName) {
         this.teamName = teamName;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 
     public boolean isActive() {
