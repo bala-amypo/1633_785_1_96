@@ -1,10 +1,14 @@
 package com.example.demo.dto;
 
-import lombok.Data;
-
-@Data
 public class AuthResponse {
-    private String token;
     private Long userId;
-    private String role;
+    private String token;
+
+    public AuthResponse(Long userId, String token) {
+        this.userId = userId;
+        this.token = token;
+    }
+
+    public Long getUserId() { return userId; }
+    public String getToken() { return token; }
 }
