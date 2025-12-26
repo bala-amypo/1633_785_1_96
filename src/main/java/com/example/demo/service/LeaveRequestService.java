@@ -1,16 +1,22 @@
 package com.example.demo.service;
 
-import com.example.demo.model.LeaveRequest;
-
+import com.example.demo.dto.LeaveRequestDto;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface LeaveRequestService {
 
-    LeaveRequest create(LeaveRequest leaveRequest);
+    LeaveRequestDto create(LeaveRequestDto dto);
 
-    LeaveRequest approve(Long id);
+    LeaveRequestDto approve(Long id);
 
-    LeaveRequest reject(Long id);
+    LeaveRequestDto reject(Long id);
 
-    List<LeaveRequest> getByEmployee(Long employeeId);
+    List<LeaveRequestDto> getByEmployee(Long employeeId);
+
+    List<LeaveRequestDto> getOverlappingForTeam(
+            String teamName,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }
