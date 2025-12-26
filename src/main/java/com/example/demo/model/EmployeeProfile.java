@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class EmployeeProfile {
@@ -9,30 +11,42 @@ public class EmployeeProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String employeeId;
+    private String fullName;
     private String email;
-
-    // REQUIRED for JPQL query
     private String teamName;
+    private String role;
+    private boolean active = true;
 
-    public EmployeeProfile() {}
+    @ManyToMany
+    @JoinTable(
+        name = "employee_colleagues",
+        joinColumns = @JoinColumn(name = "employee_id"),
+        inverseJoinColumns = @JoinColumn(name = "colleague_id")
+    )
+    private Set<EmployeeProfile> colleagues = new HashSet<>();
 
-    public EmployeeProfile(Long id, String name, String email, String teamName) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.teamName = teamName;
-    }
-
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getEmployeeId() { return employeeId; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
     public String getTeamName() { return teamName; }
     public void setTeamName(String teamName) { this.teamName = teamName; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+
+    public Set<EmployeeProfile> getColleagues() { return colleagues; }
 }
