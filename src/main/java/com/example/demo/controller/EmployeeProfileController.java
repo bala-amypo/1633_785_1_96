@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class EmployeeController {
+public class EmployeeProfileController{
     private final EmployeeProfileRepository employeeRepo;
 
     public EmployeeController(EmployeeProfileRepository employeeRepo) {

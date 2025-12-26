@@ -1,21 +1,47 @@
-package com.example.demo.controller;
+package com.example.demo.model;
 
-import com.example.demo.model.EmployeeProfile;
-import com.example.demo.service.EmployeeProfileService;
-import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.*;
 
-@RestController
-@RequestMapping("/employees")
-public class EmployeeController {
+@Entity
+public class EmployeeProfile {
 
-    private final EmployeeProfileService service;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public EmployeeController(EmployeeProfileService service) {
-        this.service = service;
+    private String name;
+    private String email;
+
+    public EmployeeProfile() {
     }
 
-    @GetMapping("/{id}")
-    public EmployeeProfile getEmployee(@PathVariable Long id) {
-        return service.getEmployeeById(id);
+    public EmployeeProfile(Long id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

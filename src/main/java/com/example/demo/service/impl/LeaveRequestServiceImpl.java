@@ -12,7 +12,7 @@ import com.example.demo.service.LeaveRequestService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-@service
+@Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     private final LeaveRequestRepository leaveRepo;
