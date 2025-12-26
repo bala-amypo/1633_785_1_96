@@ -18,6 +18,10 @@ public class EmployeeProfile {
     private String teamName;
     private String role;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
+    // -------- Constructors --------
     public EmployeeProfile() {
     }
 
@@ -68,5 +72,13 @@ public class EmployeeProfile {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
