@@ -1,9 +1,11 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
+@Data
 public class CapacityAlert {
 
     @Id
@@ -15,39 +17,12 @@ public class CapacityAlert {
     private String severity;
     private String message;
 
-    public Long getId() {
-        return id;
-    }
+    public CapacityAlert() {}
 
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
+    public CapacityAlert(String team, LocalDate date, String severity, String msg) {
+        this.teamName = team;
         this.date = date;
-    }
-
-    public String getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(String severity) {   // 🔥 REQUIRED
         this.severity = severity;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+        this.message = msg;
     }
 }

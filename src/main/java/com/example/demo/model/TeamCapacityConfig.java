@@ -5,16 +5,13 @@ import lombok.Data;
 
 @Entity
 @Data
-public class UserAccount {
+public class TeamCapacityConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
-    private String password;
-    private String role;
-
-    @OneToOne
-    private EmployeeProfile employeeProfile;
+    private String teamName;
+    private int totalHeadcount;
+    private int minCapacityPercent;
 }

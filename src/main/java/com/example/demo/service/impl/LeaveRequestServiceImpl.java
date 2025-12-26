@@ -1,55 +1,72 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.model.LeaveRequest;
-import com.example.demo.repository.LeaveRequestRepository;
+import com.example.demo.dto.LeaveRequestDto;
+import com.example.demo.exception.*;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.LeaveRequestService;
-import org.springframework.stereotype.Service;
-
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
-    private final LeaveRequestRepository repository;
+    private final LeaveRequestRepository repo;
+    private final EmployeeProfileRepository empRepo;
 
-    public LeaveRequestServiceImpl(LeaveRequestRepository repository) {
-        this.repository = repository;
+    public LeaveRequestServiceImpl(LeaveRequestRepository r, EmployeeProfileRepository e) {
+        this.repo = r;
+        this.empRepo = e;
     }
 
-    @Override
-    public LeaveRequest create(LeaveRequest leaveRequest) {
+    public LeaveRequestDto create(LeaveRequestDto dto) {
+        if (dto.getStartDate().isAfter(dto.getEndDate()))
+            throw new BadRequestException("Invalid dates");
 
-        if (leaveRequest.getStartDate().isAfter(leaveRequest.getEndDate())) {
-            throw new BadRequestException("Invalid Date Range: Start date after end date");
-        }
+        EmployeeProfile emp = empRepo.findById(dto.getEmployeeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
-        leaveRequest.setStatus("PENDING");
-        return repository.save(leaveRequest);
+        LeaveRequest l = new LeaveRequest();
+        l.setEmployee(emp);
+        l.setStartDate(dto.getStartDate());
+        l.setEndDate(dto.getEndDate());
+        l.setType(dto.getType());
+        l.setStatus("PENDING");
+
+        repo.save(l);
+        dto.setId(l.getId());
+        dto.setStatus("PENDING");
+        return dto;
     }
 
-    @Override
-    public LeaveRequest approve(Long id) {
-        LeaveRequest leave = getLeave(id);
-        leave.setStatus("APPROVED");
-        return repository.save(leave);
+    public LeaveRequestDto approve(Long id) {
+        LeaveRequest l = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
+        l.setStatus("APPROVED");
+        repo.save(l);
+        LeaveRequestDto d = new LeaveRequestDto();
+        d.setStatus("APPROVED");
+        return d;
     }
 
-    @Override
-    public LeaveRequest reject(Long id) {
-        LeaveRequest leave = getLeave(id);
-        leave.setStatus("REJECTED");
-        return repository.save(leave);
+    public LeaveRequestDto reject(Long id) {
+        LeaveRequest l = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
+        l.setStatus("REJECTED");
+        repo.save(l);
+        LeaveRequestDto d = new LeaveRequestDto();
+        d.setStatus("REJECTED");
+        return d;
     }
 
-    @Override
-    public List<LeaveRequest> getByEmployee(Long employeeId) {
-        return repository.findByEmployee_Id(employeeId);
+    public List<LeaveRequestDto> getByEmployee(Long id) {
+        EmployeeProfile emp = empRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        return repo.findByEmployee(emp).stream().map(l -> new LeaveRequestDto()).collect(Collectors.toList());
     }
 
-    private LeaveRequest getLeave(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found"));
+    public List<LeaveRequestDto> getOverlappingForTeam(String team, LocalDate s, LocalDate e) {
+        return repo.findApprovedOverlappingForTeam(team, s, e)
+                .stream().map(l -> new LeaveRequestDto()).collect(Collectors.toList());
     }
 }
