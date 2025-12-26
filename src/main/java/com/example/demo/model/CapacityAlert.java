@@ -11,23 +11,27 @@ public class CapacityAlert {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String teamName;
-
-    @Column(nullable = false)
     private int availableCapacity;
-
-    @Column(nullable = false)
     private int requiredCapacity;
-
-    @Column(nullable = false)
-    private String status; // LOW / OK / CRITICAL
-
-    @Column(nullable = false)
+    private String status;
     private LocalDate alertDate;
 
-    // ---------- Constructors ----------
+    // ---------- REQUIRED by JPA ----------
     public CapacityAlert() {}
+
+    // ---------- ADD THIS CONSTRUCTOR ----------
+    public CapacityAlert(
+            String teamName,
+            LocalDate alertDate,
+            String status,
+            String message
+    ) {
+        this.teamName = teamName;
+        this.alertDate = alertDate;
+        this.status = status;
+        // message not stored, but accepted to match service usage
+    }
 
     // ---------- Getters & Setters ----------
     public Long getId() {
