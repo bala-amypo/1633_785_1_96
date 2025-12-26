@@ -1,80 +1,105 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.EmployeeProfileDto;
+import com.example.demo.dto.LeaveRequestDto;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.EmployeeProfile;
+import com.example.demo.model.LeaveRequest;
 import com.example.demo.repository.EmployeeProfileRepository;
-import com.example.demo.service.EmployeeProfileService;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
+import com.example.demo.repository.LeaveRequestRepository;
+import com.example.demo.service.LeaveRequestService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
-public class EmployeeProfileServiceImpl implements EmployeeProfileService {
+public class LeaveRequestServiceImpl implements LeaveRequestService {
 
-    private final EmployeeProfileRepository repo;
+    private final LeaveRequestRepository leaveRepo;
+    private final EmployeeProfileRepository employeeRepo;
 
-    public EmployeeProfileServiceImpl(EmployeeProfileRepository repo) {
-        this.repo = repo;
+    public LeaveRequestServiceImpl(LeaveRequestRepository leaveRepo,
+                                   EmployeeProfileRepository employeeRepo) {
+        this.leaveRepo = leaveRepo;
+        this.employeeRepo = employeeRepo;
     }
 
     @Override
-    public EmployeeProfileDto create(EmployeeProfileDto dto) {
-        EmployeeProfile entity = new EmployeeProfile();
-        BeanUtils.copyProperties(dto, entity);
-        EmployeeProfile saved = repo.save(entity);
-        EmployeeProfileDto result = new EmployeeProfileDto();
-        BeanUtils.copyProperties(saved, result);
-        return result;
-    }
+    public LeaveRequestDto create(LeaveRequestDto dto) {
+        if (dto.getStartDate().isAfter(dto.getEndDate())) {
+            throw new BadRequestException("Invalid date range");
+        }
 
-    @Override
-    public EmployeeProfileDto update(Long id, EmployeeProfileDto dto) {
-        EmployeeProfile existing = repo.findById(id)
+        EmployeeProfile emp = employeeRepo.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
-        BeanUtils.copyProperties(dto, existing, "id", "employeeId", "email", "active");
-        EmployeeProfile updated = repo.save(existing);
-        EmployeeProfileDto result = new EmployeeProfileDto();
-        BeanUtils.copyProperties(updated, result);
-        return result;
-    }
 
-    @Override
-    public void deactivate(Long id) {
-        EmployeeProfile emp = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
-        emp.setActive(false);
-        repo.save(emp);
-    }
+        LeaveRequest l = new LeaveRequest();
+        l.setEmployee(emp);
+        l.setStartDate(dto.getStartDate());
+        l.setEndDate(dto.getEndDate());
+        l.setType(dto.getType());
+        l.setStatus("PENDING");
 
-    @Override
-    public EmployeeProfileDto getById(Long id) {
-        EmployeeProfile emp = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
-        EmployeeProfileDto dto = new EmployeeProfileDto();
-        BeanUtils.copyProperties(emp, dto);
+        LeaveRequest saved = leaveRepo.save(l);
+
+        dto.setId(saved.getId());
+        dto.setStatus("PENDING");
         return dto;
     }
 
     @Override
-    public List<EmployeeProfileDto> getByTeam(String teamName) {
-        return repo.findByTeamNameAndActiveTrue(teamName).stream()
-                .map(e -> {
-                    EmployeeProfileDto d = new EmployeeProfileDto();
-                    BeanUtils.copyProperties(e, d);
-                    return d;
-                }).collect(Collectors.toList());
+    public LeaveRequestDto approve(Long id) {
+        LeaveRequest l = leaveRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
+        l.setStatus("APPROVED");
+        leaveRepo.save(l);
+
+        LeaveRequestDto dto = new LeaveRequestDto();
+        dto.setId(l.getId());
+        dto.setStatus("APPROVED");
+        return dto;
     }
 
     @Override
-    public List<EmployeeProfileDto> getAll() {
-        return repo.findAll().stream()
-                .map(e -> {
-                    EmployeeProfileDto d = new EmployeeProfileDto();
-                    BeanUtils.copyProperties(e, d);
+    public LeaveRequestDto reject(Long id) {
+        LeaveRequest l = leaveRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
+        l.setStatus("REJECTED");
+        leaveRepo.save(l);
+
+        LeaveRequestDto dto = new LeaveRequestDto();
+        dto.setId(l.getId());
+        dto.setStatus("REJECTED");
+        return dto;
+    }
+
+    @Override
+    public List<LeaveRequestDto> getByEmployee(Long employeeId) {
+        EmployeeProfile emp = employeeRepo.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        return leaveRepo.findByEmployee(emp)
+                .stream()
+                .map(l -> {
+                    LeaveRequestDto d = new LeaveRequestDto();
+                    d.setId(l.getId());
+                    d.setStatus(l.getStatus());
                     return d;
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LeaveRequestDto> getOverlappingForTeam(String team,
+                                                       LocalDate start,
+                                                       LocalDate end) {
+        return leaveRepo.findApprovedOverlappingForTeam(team, start, end)
+                .stream()
+                .map(l -> {
+                    LeaveRequestDto d = new LeaveRequestDto();
+                    d.setId(l.getId());
+                    return d;
+                })
+                .collect(Collectors.toList());
     }
 }

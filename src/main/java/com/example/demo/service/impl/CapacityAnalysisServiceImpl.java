@@ -1,52 +1,75 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.CapacityAnalysisResultDto;
-import com.example.demo.exception.*;
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.CapacityAlert;
+import com.example.demo.model.TeamCapacityConfig;
+import com.example.demo.repository.CapacityAlertRepository;
+import com.example.demo.repository.EmployeeProfileRepository;
+import com.example.demo.repository.LeaveRequestRepository;
+import com.example.demo.repository.TeamCapacityConfigRepository;
 import com.example.demo.service.CapacityAnalysisService;
+import com.example.demo.util.DateRangeUtil;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
 
     private final TeamCapacityConfigRepository configRepo;
+    private final EmployeeProfileRepository employeeRepo;
     private final LeaveRequestRepository leaveRepo;
     private final CapacityAlertRepository alertRepo;
 
-    public CapacityAnalysisServiceImpl(TeamCapacityConfigRepository c,
-                                       EmployeeProfileRepository e,
-                                       LeaveRequestRepository l,
-                                       CapacityAlertRepository a) {
-        this.configRepo = c;
-        this.leaveRepo = l;
-        this.alertRepo = a;
+    public CapacityAnalysisServiceImpl(TeamCapacityConfigRepository configRepo,
+                                       EmployeeProfileRepository employeeRepo,
+                                       LeaveRequestRepository leaveRepo,
+                                       CapacityAlertRepository alertRepo) {
+        this.configRepo = configRepo;
+        this.employeeRepo = employeeRepo;
+        this.leaveRepo = leaveRepo;
+        this.alertRepo = alertRepo;
     }
 
-    public CapacityAnalysisResultDto analyzeTeamCapacity(String team, LocalDate s, LocalDate e) {
-        if (s.isAfter(e)) throw new BadRequestException("Start date invalid");
+    @Override
+    public CapacityAnalysisResultDto analyzeTeamCapacity(String team,
+                                                         LocalDate start,
+                                                         LocalDate end) {
 
-        TeamCapacityConfig cfg = configRepo.findByTeamName(team)
+        if (start.isAfter(end)) {
+            throw new BadRequestException("Start date after end date");
+        }
+
+        TeamCapacityConfig config = configRepo.findByTeamName(team)
                 .orElseThrow(() -> new ResourceNotFoundException("Capacity config not found"));
 
-        if (cfg.getTotalHeadcount() <= 0)
+        if (config.getTotalHeadcount() <= 0) {
             throw new BadRequestException("Invalid total headcount");
-
-        int leaves = leaveRepo.findApprovedOverlappingForTeam(team, s, e).size();
-        int available = cfg.getTotalHeadcount() - leaves;
-        int percent = (available * 100) / cfg.getTotalHeadcount();
+        }
 
         Map<LocalDate, Integer> map = new HashMap<>();
-        map.put(s, percent);
+        boolean risky = false;
 
-        CapacityAnalysisResultDto res = new CapacityAnalysisResultDto();
-        res.setCapacityByDate(map);
-        res.setRisky(percent < cfg.getMinCapacityPercent());
+        for (LocalDate d : DateRangeUtil.daysBetween(start, end)) {
+            int leaves = leaveRepo
+                    .findApprovedOverlappingForTeam(team, d, d)
+                    .size();
 
-        if (res.isRisky()) {
-            alertRepo.save(new CapacityAlert(team, s, "HIGH", "Low capacity"));
+            int capacity = (int) (((double)
+                    (config.getTotalHeadcount() - leaves)
+                    / config.getTotalHeadcount()) * 100);
+
+            map.put(d, capacity);
+
+            if (capacity < config.getMinCapacityPercent()) {
+                risky = true;
+                alertRepo.save(new CapacityAlert(
+                        team, d, "HIGH", "Capacity below threshold"));
+            }
         }
-        return res;
+
+        return new CapacityAnalysisResultDto(risky, map);
     }
 }

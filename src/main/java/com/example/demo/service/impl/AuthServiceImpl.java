@@ -8,16 +8,16 @@ import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.service.AuthService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 
-@Service
 public class AuthServiceImpl implements AuthService {
 
     private final UserAccountRepository userRepo;
     private final BCryptPasswordEncoder encoder;
     private final JwtTokenProvider tokenProvider;
 
-    public AuthServiceImpl(UserAccountRepository userRepo, BCryptPasswordEncoder encoder, JwtTokenProvider tokenProvider) {
+    public AuthServiceImpl(UserAccountRepository userRepo,
+                           BCryptPasswordEncoder encoder,
+                           JwtTokenProvider tokenProvider) {
         this.userRepo = userRepo;
         this.encoder = encoder;
         this.tokenProvider = tokenProvider;
@@ -26,17 +26,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse authenticate(AuthRequest request) {
         UserAccount user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
         if (!encoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BadRequestException("Invalid credentials");
+            throw new BadRequestException("Invalid password");
         }
 
         String token = tokenProvider.generateToken(user);
-        AuthResponse resp = new AuthResponse();
-        resp.setToken(token);
-        resp.setUserId(user.getId());
-        resp.setRole(user.getRole());
-        return resp;
+        return new AuthResponse(user.getId(), token);
     }
 }
