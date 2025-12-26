@@ -11,37 +11,39 @@ import java.util.List;
 @RequestMapping("/api/leaves")
 public class LeaveRequestController {
 
-    private final LeaveRequestService service;
+    private final LeaveRequestService leaveService;
 
-    public LeaveRequestController(LeaveRequestService service) {
-        this.service = service;
+    public LeaveRequestController(LeaveRequestService leaveService) {
+        this.leaveService = leaveService;
     }
 
     @PostMapping
     public LeaveRequestDto create(@RequestBody LeaveRequestDto dto) {
-        return service.create(dto);
+        return leaveService.create(dto);
     }
 
     @PutMapping("/{id}/approve")
     public LeaveRequestDto approve(@PathVariable Long id) {
-        return service.approve(id);
+        return leaveService.approve(id);
     }
 
     @PutMapping("/{id}/reject")
     public LeaveRequestDto reject(@PathVariable Long id) {
-        return service.reject(id);
+        return leaveService.reject(id);
     }
 
     @GetMapping("/employee/{employeeId}")
     public List<LeaveRequestDto> getByEmployee(@PathVariable Long employeeId) {
-        return service.getByEmployee(employeeId);
+        return leaveService.getByEmployee(employeeId);
     }
 
-    @GetMapping("/team/{teamName}")
+    @GetMapping("/team/{team}")
     public List<LeaveRequestDto> getOverlappingForTeam(
-            @PathVariable String teamName,
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
-        return service.getOverlappingForTeam(teamName, startDate, endDate);
+            @PathVariable String team,
+            @RequestParam LocalDate start,
+            @RequestParam LocalDate end) {
+
+        return leaveService.getOverlappingForTeam(team, start, end);
     }
 }
+    

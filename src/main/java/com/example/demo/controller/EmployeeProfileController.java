@@ -10,41 +10,40 @@ import java.util.List;
 @RequestMapping("/api/employees")
 public class EmployeeProfileController {
 
-    private final EmployeeProfileService service;
+    private final EmployeeProfileService employeeService;
 
-    public EmployeeProfileController(EmployeeProfileService service) {
-        this.service = service;
+    public EmployeeProfileController(EmployeeProfileService employeeService) {
+        this.employeeService = employeeService;
     }
 
     @PostMapping
     public EmployeeProfileDto create(@RequestBody EmployeeProfileDto dto) {
-        return service.create(dto);
+        return employeeService.create(dto);
     }
 
     @PutMapping("/{id}")
-    public EmployeeProfileDto update(
-            @PathVariable Long id,
-            @RequestBody EmployeeProfileDto dto) {
-        return service.update(id, dto);
+    public EmployeeProfileDto update(@PathVariable Long id,
+                                     @RequestBody EmployeeProfileDto dto) {
+        return employeeService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
     public void deactivate(@PathVariable Long id) {
-        service.deactivate(id);
+        employeeService.deactivate(id);
     }
 
     @GetMapping("/{id}")
     public EmployeeProfileDto getById(@PathVariable Long id) {
-        return service.getById(id);
+        return employeeService.getById(id);
     }
 
     @GetMapping
     public List<EmployeeProfileDto> getAll() {
-        return service.getAll();
+        return employeeService.getAll();
     }
 
     @GetMapping("/team/{teamName}")
     public List<EmployeeProfileDto> getByTeam(@PathVariable String teamName) {
-        return service.getByTeam(teamName);
+        return employeeService.getByTeam(teamName);
     }
 }
