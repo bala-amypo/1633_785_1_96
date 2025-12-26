@@ -1,34 +1,22 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.EmployeeProfile;
-import com.example.demo.repository.EmployeeProfileRepository;
-
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.service.EmployeeProfileService;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class EmployeeProfileController{
-    private final EmployeeProfileRepository employeeRepo;
+@RequestMapping("/employee-profiles")
+public class EmployeeProfileController {
 
-    public EmployeeController(EmployeeProfileRepository employeeRepo) {
-        this.employeeRepo = employeeRepo;
+    private final EmployeeProfileService employeeProfileService;
+
+    // ✅ Constructor name MUST match class name
+    public EmployeeProfileController(EmployeeProfileService employeeProfileService) {
+        this.employeeProfileService = employeeProfileService;
     }
 
-    @GetMapping("/employees")
-    public String list(Model model) {
-        model.addAttribute("employees", employeeRepo.findAll());
-        return "employees";
-    }
-
-    @PostMapping("/employees")
-    public String add(@RequestParam String fullName, @RequestParam String email) {
-        EmployeeProfile e = new EmployeeProfile();
-        e.setFullName(fullName);
-        e.setEmail(email);
-        employeeRepo.save(e);
-        return "redirect:/employees";
+    @GetMapping("/{id}")
+    public EmployeeProfile getEmployeeProfile(@PathVariable Long id) {
+        return employeeProfileService.getEmployeeById(id);
     }
 }
