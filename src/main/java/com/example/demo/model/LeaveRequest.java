@@ -4,36 +4,58 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "leave_requests")
 public class LeaveRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "employee_id")
     private EmployeeProfile employee;
 
     private LocalDate startDate;
     private LocalDate endDate;
-    private String type;
-    private String status;
 
-    // getters & setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    private String type;     // ANNUAL, SICK, etc
+    private String status;   // PENDING, APPROVED, REJECTED
 
-    public EmployeeProfile getEmployee() { return employee; }
-    public void setEmployee(EmployeeProfile employee) { this.employee = employee; }
+    @Column(length = 500)
+    private String reason;   // ✅ REQUIRED BY TESTS
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    // ---------------- Constructors ----------------
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public LeaveRequest() {}
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    // ---------------- Getters & Setters ----------------
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-}
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public EmployeeProfile getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(EmployeeProfile employee) {
+        this.employee = employee;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void se
