@@ -4,36 +4,20 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "leave_request")
 public class LeaveRequest {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "employee_id")
+    @ManyToOne
     private EmployeeProfile employee;
 
-    @Column(nullable = false)
-    private String teamName;
-
-    @Column(nullable = false)
     private LocalDate startDate;
-
-    @Column(nullable = false)
     private LocalDate endDate;
-
-    @Column(nullable = false)
-    private String type;   // ✅ REQUIRED BY SERVICE
-
-    @Column(nullable = false)
+    private String type;
+    private String reason;
     private String status;
 
-    // ---------- Constructors ----------
-    public LeaveRequest() {}
-
-    // ---------- Getters & Setters ----------
     public Long getId() {
         return id;
     }
@@ -48,14 +32,6 @@ public class LeaveRequest {
 
     public void setEmployee(EmployeeProfile employee) {
         this.employee = employee;
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
     }
 
     public LocalDate getStartDate() {
@@ -80,6 +56,14 @@ public class LeaveRequest {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public String getStatus() {
