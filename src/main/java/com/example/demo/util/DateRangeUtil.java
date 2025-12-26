@@ -1,34 +1,16 @@
 package com.example.demo.util;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.temporal.ChronoUnit;
 
 public class DateRangeUtil {
 
-    private DateRangeUtil() {
-        // utility class – no object creation
-    }
+    private DateRangeUtil() {}
 
-    /**
-     * Returns a list of dates between startDate and endDate (inclusive)
-     */
-    public static List<LocalDate> getDatesBetween(
-            LocalDate startDate,
-            LocalDate endDate
-    ) {
-        List<LocalDate> dates = new ArrayList<>();
-
-        if (startDate == null || endDate == null) {
-            return dates;
+    public static long daysBetween(LocalDate start, LocalDate end) {
+        if (start == null || end == null) {
+            return 0;
         }
-
-        LocalDate current = startDate;
-        while (!current.isAfter(endDate)) {
-            dates.add(current);
-            current = current.plusDays(1);
-        }
-
-        return dates;
+        return ChronoUnit.DAYS.between(start, end);
     }
 }
