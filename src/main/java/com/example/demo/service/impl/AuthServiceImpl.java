@@ -8,6 +8,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void login() {
-        // TODO: implement login logic later
+        // login logic placeholder
     }
 }

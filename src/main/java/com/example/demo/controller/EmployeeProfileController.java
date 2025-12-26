@@ -8,15 +8,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/employee-profiles")
 public class EmployeeProfileController {
 
-    private final EmployeeProfileService employeeProfileService;
+    private final EmployeeProfileService service;
 
-    // ✅ Constructor name MUST match class name
-    public EmployeeProfileController(EmployeeProfileService employeeProfileService) {
-        this.employeeProfileService = employeeProfileService;
+    public EmployeeProfileController(EmployeeProfileService service) {
+        this.service = service;
     }
 
     @GetMapping("/{id}")
-    public EmployeeProfile getEmployeeProfile(@PathVariable Long id) {
-        return employeeProfileService.getEmployeeById(id);
+    public EmployeeProfile getById(@PathVariable Long id) {
+        return service.getEmployeeById(id);
     }
 }

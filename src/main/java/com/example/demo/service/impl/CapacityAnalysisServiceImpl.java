@@ -8,6 +8,6 @@ public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
 
     @Override
     public void analyze() {
-        // logic can be added later
+        // future logic
     }
 }

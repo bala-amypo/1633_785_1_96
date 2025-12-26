@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/leave-requests")
 public class LeaveRequestController {
 
-    private final LeaveRequestService leaveRequestService;
+    private final LeaveRequestService service;
 
-    public LeaveRequestController(LeaveRequestService leaveRequestService) {
-        this.leaveRequestService = leaveRequestService;
+    public LeaveRequestController(LeaveRequestService service) {
+        this.service = service;
     }
 
     @PostMapping
     public LeaveRequest create(@RequestBody LeaveRequest request) {
-        return leaveRequestService.createLeave(request);
+        return service.createLeave(request);
     }
 }
