@@ -1,33 +1,51 @@
+package com.example.demo.service;
+
+import com.example.demo.dto.AuthRequest;
+import com.example.demo.dto.AuthResponse;
+
+public interface AuthService {
+    AuthResponse authenticate(AuthRequest request);
+}
+
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.*;
+import com.example.demo.dto.AuthRequest;
+import com.example.demo.dto.AuthResponse;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.model.UserAccount;
 import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.service.AuthService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import java.util.Optional;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserAccountRepository repo;
+    private final UserAccountRepository userRepo;
     private final BCryptPasswordEncoder encoder;
-    private final JwtTokenProvider jwt;
+    private final JwtTokenProvider tokenProvider;
 
-    public AuthServiceImpl(UserAccountRepository r, BCryptPasswordEncoder e, JwtTokenProvider j) {
-        this.repo = r;
-        this.encoder = e;
-        this.jwt = j;
+    public AuthServiceImpl(UserAccountRepository userRepo, BCryptPasswordEncoder encoder, JwtTokenProvider tokenProvider) {
+        this.userRepo = userRepo;
+        this.encoder = encoder;
+        this.tokenProvider = tokenProvider;
     }
 
-    public AuthResponse authenticate(AuthRequest req) {
-        UserAccount user = repo.findByEmail(req.getEmail())
-                .orElseThrow(() -> new BadRequestException("User not found"));
+    @Override
+    public AuthResponse authenticate(AuthRequest request) {
+        UserAccount user = userRepo.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-        if (!encoder.matches(req.getPassword(), user.getPassword())) {
-            throw new BadRequestException("Invalid password");
+        if (!encoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BadRequestException("Invalid credentials");
         }
-        return new AuthResponse(jwt.generateToken(user), user.getId());
+
+        String token = tokenProvider.generateToken(user);
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setUserId(user.getId());
+        resp.setRole(user.getRole());
+        return resp;
     }
 }
