@@ -1,12 +1,14 @@
 package com.example.demo.repository;
 
-import com.example.demo.model.*;
-import java.time.LocalDate;
-import java.util.*;
+import com.example.demo.model.EmployeeProfile;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface EmployeeProfileRepository {
-    Optional<EmployeeProfile> findById(Long id);
-    List<EmployeeProfile> findByTeamNameAndActiveTrue(String team);
-    List<EmployeeProfile> findAll();
-    EmployeeProfile save(EmployeeProfile e);
+import java.util.Optional;
+
+@Repository
+public interface EmployeeProfileRepository
+        extends JpaRepository<EmployeeProfile, Long> {
+
+    Optional<EmployeeProfile> findByEmployeeId(String employeeId);
 }
