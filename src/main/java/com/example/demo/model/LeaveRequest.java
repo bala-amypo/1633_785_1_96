@@ -12,7 +12,7 @@ public class LeaveRequest {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "employee_id_fk")
+    @JoinColumn(name = "employee_id")
     private EmployeeProfile employee;
 
     @Column(nullable = false)
@@ -25,10 +25,7 @@ public class LeaveRequest {
     private LocalDate endDate;
 
     @Column(nullable = false)
-    private String type;
-
-    @Column(nullable = false)
-    private String status; // APPROVED / PENDING / REJECTED
+    private String status;
 
     // ---------- Constructors ----------
     public LeaveRequest() {}
@@ -72,14 +69,6 @@ public class LeaveRequest {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getStatus() {
