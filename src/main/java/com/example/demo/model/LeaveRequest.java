@@ -25,6 +25,9 @@ public class LeaveRequest {
     private LocalDate endDate;
 
     @Column(nullable = false)
+    private String type;   // ✅ REQUIRED BY SERVICE
+
+    @Column(nullable = false)
     private String status;
 
     // ---------- Constructors ----------
@@ -69,6 +72,14 @@ public class LeaveRequest {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getStatus() {

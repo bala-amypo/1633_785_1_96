@@ -14,7 +14,13 @@ public class EmployeeProfile {
     private String employeeId;
 
     @Column(nullable = false)
-    private String name;
+    private String fullName;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String role;
 
     @Column(nullable = false)
     private String teamName;
@@ -42,12 +48,28 @@ public class EmployeeProfile {
         this.employeeId = employeeId;
     }
 
-    public String getName() {
-        return name;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getTeamName() {
