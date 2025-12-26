@@ -1,49 +1,44 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.LeaveRequestDto;
-import com.example.demo.service.LeaveRequestService;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.model.LeaveRequest;
+import com.example.demo.model.EmployeeProfile;
+import com.example.demo.repository.LeaveRequestRepository;
+import com.example.demo.repository.EmployeeProfileRepository;
+// import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
-@RequestMapping("/api/leaves")
-public class LeaveRequestController {
+public class LeaveController {
+    private final LeaveRequestRepository leaveRepo;
+    private final EmployeeProfileRepository employeeRepo;
 
-    private final LeaveRequestService leaveService;
-
-    public LeaveRequestController(LeaveRequestService leaveService) {
-        this.leaveService = leaveService;
+    public LeaveController(LeaveRequestRepository leaveRepo, EmployeeProfileRepository employeeRepo) {
+        this.leaveRepo = leaveRepo;
+        this.employeeRepo = employeeRepo;
     }
 
-    @PostMapping
-    public LeaveRequestDto create(@RequestBody LeaveRequestDto dto) {
-        return leaveService.create(dto);
+    @GetMapping("/leaves")
+    public String list(Model model) {
+        model.addAttribute("leaves", leaveRepo.findAll());
+        return "leaves";
     }
 
-    @PutMapping("/{id}/approve")
-    public LeaveRequestDto approve(@PathVariable Long id) {
-        return leaveService.approve(id);
-    }
-
-    @PutMapping("/{id}/reject")
-    public LeaveRequestDto reject(@PathVariable Long id) {
-        return leaveService.reject(id);
-    }
-
-    @GetMapping("/employee/{employeeId}")
-    public List<LeaveRequestDto> getByEmployee(@PathVariable Long employeeId) {
-        return leaveService.getByEmployee(employeeId);
-    }
-
-    @GetMapping("/team/{team}")
-    public List<LeaveRequestDto> getOverlappingForTeam(
-            @PathVariable String team,
-            @RequestParam LocalDate start,
-            @RequestParam LocalDate end) {
-
-        return leaveService.getOverlappingForTeam(team, start, end);
+    @PostMapping("/leaves")
+    public String add(@RequestParam Long employeeId, @RequestParam String start, @RequestParam String end) {
+        EmployeeProfile e = employeeRepo.findById(employeeId).orElse(null);
+        if (e == null) return "redirect:/leaves";
+        LeaveRequest l = new LeaveRequest();
+        l.setEmployee(e);
+        l.setStartDate(LocalDate.parse(start));
+        l.setEndDate(LocalDate.parse(end));
+        l.setStatus("PENDING");
+        leaveRepo.save(l);
+        return "redirect:/leaves";
     }
 }
-    

@@ -1,49 +1,34 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.EmployeeProfileDto;
-import com.example.demo.service.EmployeeProfileService;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.model.EmployeeProfile;
+import com.example.demo.repository.EmployeeProfileRepository;
 
-import java.util.List;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/employees")
-public class EmployeeProfileController {
+public class EmployeeController {
+    private final EmployeeProfileRepository employeeRepo;
 
-    private final EmployeeProfileService employeeService;
-
-    public EmployeeProfileController(EmployeeProfileService employeeService) {
-        this.employeeService = employeeService;
+    public EmployeeController(EmployeeProfileRepository employeeRepo) {
+        this.employeeRepo = employeeRepo;
     }
 
-    @PostMapping
-    public EmployeeProfileDto create(@RequestBody EmployeeProfileDto dto) {
-        return employeeService.create(dto);
+    @GetMapping("/employees")
+    public String list(Model model) {
+        model.addAttribute("employees", employeeRepo.findAll());
+        return "employees";
     }
 
-    @PutMapping("/{id}")
-    public EmployeeProfileDto update(@PathVariable Long id,
-                                     @RequestBody EmployeeProfileDto dto) {
-        return employeeService.update(id, dto);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deactivate(@PathVariable Long id) {
-        employeeService.deactivate(id);
-    }
-
-    @GetMapping("/{id}")
-    public EmployeeProfileDto getById(@PathVariable Long id) {
-        return employeeService.getById(id);
-    }
-
-    @GetMapping
-    public List<EmployeeProfileDto> getAll() {
-        return employeeService.getAll();
-    }
-
-    @GetMapping("/team/{teamName}")
-    public List<EmployeeProfileDto> getByTeam(@PathVariable String teamName) {
-        return employeeService.getByTeam(teamName);
+    @PostMapping("/employees")
+    public String add(@RequestParam String fullName, @RequestParam String email) {
+        EmployeeProfile e = new EmployeeProfile();
+        e.setFullName(fullName);
+        e.setEmail(email);
+        employeeRepo.save(e);
+        return "redirect:/employees";
     }
 }
