@@ -1,93 +1,21 @@
-package com.example.demo.model;
+package com.example.demo.controller;
 
-import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import com.example.demo.model.EmployeeProfile;
+import com.example.demo.service.EmployeeProfileService;
+import org.springframework.web.bind.annotation.*;
 
-@Entity
-public class EmployeeProfile {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@RestController
+@RequestMapping("/employees")
+public class EmployeeController {
 
-    private String employeeId;
-    private String fullName;
-    private String email;
-    private String teamName;
-    private String role;
-    private Boolean active = true;
+    private final EmployeeProfileService service;
 
-    @ManyToMany
-    @JoinTable(name = "employee_colleagues",
-            joinColumns = @JoinColumn(name = "employee_id"),
-            inverseJoinColumns = @JoinColumn(name = "colleague_id"))
-    private Set<EmployeeProfile> colleagues = new HashSet<>();
-
-    public Long getId() {
-        return id;
+    public EmployeeController(EmployeeProfileService service) {
+        this.service = service;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public boolean isActive() {
-        return active != null && active;
-    }
-
-    public Set<EmployeeProfile> getColleagues() {
-        return colleagues;
-    }
-
-    public void setColleagues(Set<EmployeeProfile> colleagues) {
-        this.colleagues = colleagues;
+    @GetMapping("/{id}")
+    public EmployeeProfile getEmployee(@PathVariable Long id) {
+        return service.getEmployeeById(id);
     }
 }
