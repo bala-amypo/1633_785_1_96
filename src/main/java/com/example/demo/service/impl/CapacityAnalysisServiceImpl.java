@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
+public class CapacityAnalysisServiceImpl implements CapacityAnalysisService{
 
     private final TeamCapacityConfigRepository configRepo;
     private final EmployeeProfileRepository employeeRepo;

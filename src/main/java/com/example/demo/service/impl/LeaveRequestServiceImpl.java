@@ -20,22 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CapacityAnalysisServiceImpl implements CapacityAnalysisService {
+public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     private final TeamCapacityConfigRepository capacityRepo;
     private final EmployeeProfileRepository employeeRepo;
     private final LeaveRequestRepository leaveRepo;
     private final CapacityAlertRepository alertRepo;
-
-    public CapacityAnalysisServiceImpl(TeamCapacityConfigRepository capacityRepo,
-                                       EmployeeProfileRepository employeeRepo,
-                                       LeaveRequestRepository leaveRepo,
-                                       CapacityAlertRepository alertRepo) {
-        this.capacityRepo = capacityRepo;
-        this.employeeRepo = employeeRepo;
-        this.leaveRepo = leaveRepo;
-        this.alertRepo = alertRepo;
-    }
 
     @Override
     public CapacityAnalysisResultDto analyzeTeamCapacity(String teamName, LocalDate start, LocalDate end) {
