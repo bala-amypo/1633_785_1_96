@@ -1,19 +1,35 @@
 package com.example.demo.servlet;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
-public class SimpleStatusServlet extends HttpServlet {
+public class SimpleHelloServlet extends HttpServlet {
+
+    private String message;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void init(ServletConfig config) throws ServletException {
+        // IMPORTANT: null-check required for testServletHandlesNullConfig
+        if (config != null) {
+            super.init(config);
+        }
+        message = "Hello from servlet";
+    }
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("text/plain");
-        response.getWriter().write("Server is running");
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        resp.setContentType("text/plain");
+
+        PrintWriter writer = resp.getWriter();
+        writer.write(message);
+        writer.flush();
     }
 }
