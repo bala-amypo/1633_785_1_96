@@ -4,7 +4,7 @@ import com.example.demo.dto.LeaveRequestDto;
 
 import java.time.LocalDate;
 import java.util.List;
-@service
+@Service
 public interface LeaveRequestService {
     LeaveRequestDto create(LeaveRequestDto dto);
     LeaveRequestDto approve(Long id);

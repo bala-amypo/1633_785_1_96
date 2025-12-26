@@ -6,7 +6,7 @@ import com.example.demo.service.EmployeeProfileService;
 import com.example.demo.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-@Service   // 🔥 THIS WAS MISSING (MAIN ERROR)
+@Service
 public class EmployeeProfileServiceImpl implements EmployeeProfileService {
 
     private final EmployeeProfileRepository repository;

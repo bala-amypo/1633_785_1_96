@@ -8,7 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-@compound
+@Component
 public class JwtTokenProvider {
     private String jwtSecret = "change-this-secret-key-change-this-secret-key-change";
 
