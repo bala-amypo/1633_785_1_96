@@ -10,7 +10,6 @@ public class LeaveRequestController {
 
     private final LeaveRequestService leaveRequestService;
 
-    // constructor name MUST match class name
     public LeaveRequestController(LeaveRequestService leaveRequestService) {
         this.leaveRequestService = leaveRequestService;
     }
