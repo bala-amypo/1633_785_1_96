@@ -1,4 +1,3 @@
-// File: src/main/java/com/example/demo/service/LeaveRequestService.java
 package com.example.demo.service;
 
 import com.example.demo.dto.LeaveRequestDto;
@@ -9,7 +8,6 @@ public interface LeaveRequestService {
     LeaveRequestDto create(LeaveRequestDto dto);
     LeaveRequestDto approve(Long id);
     LeaveRequestDto reject(Long id);
-    LeaveRequestDto getById(Long id);
     List<LeaveRequestDto> getByEmployee(Long employeeId);
-    List<LeaveRequestDto> getOverlappingForTeam(String teamName, LocalDate startDate, LocalDate endDate);
+    List<LeaveRequestDto> getOverlappingForTeam(String teamName, LocalDate start, LocalDate end);
 }
