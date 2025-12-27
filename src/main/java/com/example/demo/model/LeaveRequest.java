@@ -31,6 +31,7 @@ public class LeaveRequest {
     
     private String reason;
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -53,10 +54,11 @@ public class LeaveRequest {
     public void setReason(String reason) { this.reason = reason; }
 }
 
-enum LeaveType {
+// PUBLIC ENUMS - Must be in same file or separate public files
+public enum LeaveType {
     ANNUAL, SICK, MATERNITY
 }
 
-enum LeaveStatus {
+public enum LeaveStatus {
     PENDING, APPROVED, REJECTED
 }

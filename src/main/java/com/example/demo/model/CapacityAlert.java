@@ -32,6 +32,7 @@ public class CapacityAlert {
         this.message = message;
     }
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -48,6 +49,7 @@ public class CapacityAlert {
     public void setMessage(String message) { this.message = message; }
 }
 
-enum AlertSeverity {
+// PUBLIC ENUM
+public enum AlertSeverity {
     LOW, MEDIUM, HIGH
 }
