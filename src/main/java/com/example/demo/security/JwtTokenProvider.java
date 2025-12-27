@@ -13,7 +13,7 @@ public class JwtTokenProvider {
     private SecretKey jwtSecret = Keys.secretKeyFor(SignatureAlgorithm.HS512);
     
     public JwtTokenProvider() {
-        // Default constructor for tests
+        // Default constructor for tests - supports reflection injection
     }
     
     public String generateToken(Object user) {
@@ -38,20 +38,29 @@ public class JwtTokenProvider {
     }
     
     public String getEmail(String token) {
-        return getClaim(token, Claims::getSubject);
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token).getBody();
+            return claims.getSubject();
+        } catch (Exception e) {
+            return null;
+        }
     }
     
     public String getRole(String token) {
-        return getClaim(token, claims -> claims.get("role", String.class));
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token).getBody();
+            return claims.get("role", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
     
     public Long getUserId(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token).getBody();
-        return claims.get("userId", Long.class);
-    }
-    
-    private <T> T getClaim(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token).getBody();
-        return claimsResolver.apply(claims);
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token).getBody();
+            return claims.get("userId", Long.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
