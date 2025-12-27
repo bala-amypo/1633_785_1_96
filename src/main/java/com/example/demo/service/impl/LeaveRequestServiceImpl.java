@@ -61,4 +61,3 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         return entity;
     }
 }
-`
