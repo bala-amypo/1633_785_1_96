@@ -1,10 +1,10 @@
-// File: src/main/java/com/example/demo/dto/AuthRequest.java
 package com.example.demo.dto;
 
 public class AuthRequest {
     private String email;
     private String password;
-    
+
+    // Getters and setters
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
