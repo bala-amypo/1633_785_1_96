@@ -1,30 +1,14 @@
-// File: src/main/java/com/example/demo/dto/EmployeeProfileDto.java
-package com.example.demo.dto;
+// File: src/main/java/com/example/demo/service/EmployeeProfileService.java
+package com.example.demo.service;
 
-public class EmployeeProfileDto {
-    private Long id;
-    private String employeeId;
-    private String fullName;
-    private String email;
-    private String teamName;
-    private String role;
+import com.example.demo.dto.EmployeeProfileDto;
+import java.util.List;
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public String getEmployeeId() { return employeeId; }
-    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
-    
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-    
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    
-    public String getTeamName() { return teamName; }
-    public void setTeamName(String teamName) { this.teamName = teamName; }
-    
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+public interface EmployeeProfileService {
+    EmployeeProfileDto create(EmployeeProfileDto dto);
+    EmployeeProfileDto update(Long id, EmployeeProfileDto dto);
+    EmployeeProfileDto getById(Long id);
+    void deactivate(Long id);
+    List<EmployeeProfileDto> getByTeam(String teamName);
+    List<EmployeeProfileDto> getAll();
 }

@@ -1,36 +1,16 @@
-// File: src/main/java/com/example/demo/dto/LeaveRequestDto.java
-package com.example.demo.dto;
+// File: src/main/java/com/example/demo/service/LeaveRequestService.java
+package com.example.demo.service;
 
+import com.example.demo.dto.LeaveRequestDto;
 import java.time.LocalDate;
+import java.util.List;
 
-public class LeaveRequestDto {
-    private Long id;
-    private Long employeeId;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private String type;
-    private String status;
-    private String reason;
-
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public Long getEmployeeId() { return employeeId; }
-    public void setEmployeeId(Long employeeId) { this.employeeId = employeeId; }
-    
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-    
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-    
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
-    
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
+public interface LeaveRequestService {
+    LeaveRequestDto create(LeaveRequestDto dto);
+    LeaveRequestDto approve(Long id);
+    LeaveRequestDto reject(Long id);
+    List<LeaveRequestDto> getByEmployee(Long employeeId);
+    List<LeaveRequestDto> getOverlappingForTeam(String teamName, LocalDate startDate, LocalDate endDate);
+    LeaveRequestDto getById(Long id);  // Missing method
 }
+    
