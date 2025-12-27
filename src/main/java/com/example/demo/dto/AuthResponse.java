@@ -1,13 +1,16 @@
-// File: src/main/java/com/example/demo/dto/AuthResponse.java
+// Update: src/main/java/com/example/demo/dto/AuthResponse.java
 package com.example.demo.dto;
 
 public class AuthResponse {
     private String token;
     private Long userId;
     
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
+    public AuthResponse() {} // Add default constructor
     
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public AuthResponse(String token, Long userId) {
+        this.token = token;
+        this.userId = userId;
+    }
+    
+    // ... existing getters/setters
 }
