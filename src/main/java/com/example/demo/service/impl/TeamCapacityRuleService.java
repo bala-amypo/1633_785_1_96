@@ -42,7 +42,7 @@ public class TeamCapacityRuleServiceImpl implements TeamCapacityRuleService {
         return configRepository.findByTeamName(teamName)
                 .orElseThrow(() -> new ResourceNotFoundException("Capacity config not found"));
     }
-
+    @Override
     private void validateRule(TeamCapacityConfig rule) {
         if (rule.getTotalHeadcount() <= 0) {
             throw new BadRequestException("Total headcount must be greater than 0");
