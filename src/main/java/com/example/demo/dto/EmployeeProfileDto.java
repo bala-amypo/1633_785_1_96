@@ -1,15 +1,14 @@
-// File: src/main/java/com/example/demo/dto/EmployeeProfileDto.java
 package com.example.demo.dto;
 
 public class EmployeeProfileDto {
     private Long id;
     private String employeeId;
-    private String fullName;  // Changed from name to fullName
+    private String fullName;
     private String email;
     private String teamName;
     private String role;
 
-    // All getters and setters
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -27,4 +26,4 @@ public class EmployeeProfileDto {
     
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
-}
+} 

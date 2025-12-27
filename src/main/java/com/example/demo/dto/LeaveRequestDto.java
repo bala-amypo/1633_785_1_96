@@ -1,4 +1,3 @@
-// File: src/main/java/com/example/demo/dto/LeaveRequestDto.java
 package com.example.demo.dto;
 
 import java.time.LocalDate;
@@ -12,7 +11,7 @@ public class LeaveRequestDto {
     private String status;
     private String reason;
 
-    // All getters and setters
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
