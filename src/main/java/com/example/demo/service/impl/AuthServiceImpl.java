@@ -7,34 +7,42 @@ import com.example.demo.model.UserAccount;
 import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
-
-    private final UserAccountRepository userRepo;
-    private final BCryptPasswordEncoder encoder;
+    
+    private final UserAccountRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
 
-    public AuthServiceImpl(UserAccountRepository userRepo,
-                           BCryptPasswordEncoder encoder,
-                           JwtTokenProvider tokenProvider) {
-        this.userRepo = userRepo;
-        this.encoder = encoder;
+    public AuthServiceImpl(UserAccountRepository userRepository, 
+                          BCryptPasswordEncoder passwordEncoder, 
+                          JwtTokenProvider tokenProvider) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
     }
 
     @Override
     public AuthResponse authenticate(AuthRequest request) {
-        UserAccount user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("User not found"));
-
-        if (!encoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BadRequestException("Invalid password");
+        UserAccount user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+        
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BadRequestException("Invalid credentials");
         }
-
+        
         String token = tokenProvider.generateToken(user);
-        return new AuthResponse(token, user.getId());
+        
+        AuthResponse response = new AuthResponse();
+        response.setToken(token);
+        response.setUserId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+        
+        return response;
     }
 }
