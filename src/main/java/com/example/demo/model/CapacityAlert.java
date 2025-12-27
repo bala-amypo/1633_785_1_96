@@ -48,8 +48,3 @@ public class CapacityAlert {
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
 }
-
-// PUBLIC ENUM
-public enum AlertSeverity {
-    LOW, MEDIUM, HIGH
-}

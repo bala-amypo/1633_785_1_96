@@ -1,64 +1,106 @@
-// File: src/main/java/com/example/demo/model/LeaveRequest.java
-package com.example.demo.model;
+// File: src/main/java/com/example/demo/service/impl/LeaveRequestServiceImpl.java
+package com.example.demo.service.impl;
 
-import jakarta.persistence.*;
+import com.example.demo.dto.LeaveRequestDto;
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.EmployeeProfile;
+import com.example.demo.model.LeaveRequest;
+import com.example.demo.model.LeaveStatus;
+import com.example.demo.model.LeaveType;
+import com.example.demo.repository.EmployeeProfileRepository;
+import com.example.demo.repository.LeaveRequestRepository;
+import com.example.demo.service.LeaveRequestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "leave_request")
-public class LeaveRequest {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
-    private EmployeeProfile employee;
-    
-    @Column(nullable = false)
-    private LocalDate startDate;
-    
-    @Column(nullable = false)
-    private LocalDate endDate;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private LeaveType type;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private LeaveStatus status = LeaveStatus.PENDING;
-    
-    private String reason;
+@Service
+public class LeaveRequestServiceImpl implements LeaveRequestService {
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public EmployeeProfile getEmployee() { return employee; }
-    public void setEmployee(EmployeeProfile employee) { this.employee = employee; }
-    
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-    
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-    
-    public LeaveType getType() { return type; }
-    public void setType(LeaveType type) { this.type = type; }
-    
-    public LeaveStatus getStatus() { return status; }
-    public void setStatus(LeaveStatus status) { this.status = status; }
-    
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
-}
+    private final LeaveRequestRepository leaveRepo;
+    private final EmployeeProfileRepository employeeRepo;
 
-// PUBLIC ENUMS - Must be in same file or separate public files
-public enum LeaveType {
-    ANNUAL, SICK, MATERNITY
-}
+    @Autowired
+    public LeaveRequestServiceImpl(LeaveRequestRepository leaveRepo, EmployeeProfileRepository employeeRepo) {
+        this.leaveRepo = leaveRepo;
+        this.employeeRepo = employeeRepo;
+    }
 
-public enum LeaveStatus {
-    PENDING, APPROVED, REJECTED
+    @Override
+    public LeaveRequestDto create(LeaveRequestDto dto) {
+        EmployeeProfile emp = employeeRepo.findById(dto.getEmployeeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        
+        if (dto.getStartDate().isAfter(dto.getEndDate())) {
+            throw new BadRequestException("Start date cannot be after end date");
+        }
+
+        LeaveRequest leave = new LeaveRequest();
+        leave.setEmployee(emp);
+        leave.setStartDate(dto.getStartDate());
+        leave.setEndDate(dto.getEndDate());
+        leave.setType(LeaveType.valueOf(dto.getType()));
+        leave.setStatus(LeaveStatus.PENDING);
+        leave.setReason(dto.getReason());
+
+        LeaveRequest saved = leaveRepo.save(leave);
+        return convertToDto(saved);
+    }
+
+    @Override
+    public LeaveRequestDto approve(Long id) {
+        return updateStatus(id, LeaveStatus.APPROVED);
+    }
+
+    @Override
+    public LeaveRequestDto reject(Long id) {
+        return updateStatus(id, LeaveStatus.REJECTED);
+    }
+
+    @Override
+    public List<LeaveRequestDto> getByEmployee(Long employeeId) {
+        EmployeeProfile emp = employeeRepo.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        return leaveRepo.findByEmployee(emp).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LeaveRequestDto> getOverlappingForTeam(String teamName, LocalDate startDate, LocalDate endDate) {
+        return leaveRepo.findApprovedOverlappingForTeam(teamName, startDate, endDate).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public LeaveRequestDto getById(Long id) {
+        LeaveRequest leave = leaveRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found"));
+        return convertToDto(leave);
+    }
+
+    private LeaveRequestDto updateStatus(Long id, LeaveStatus status) {
+        LeaveRequest leave = leaveRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found"));
+        leave.setStatus(status);
+        LeaveRequest saved = leaveRepo.save(leave);
+        return convertToDto(saved);
+    }
+
+    private LeaveRequestDto convertToDto(LeaveRequest leave) {
+        LeaveRequestDto dto = new LeaveRequestDto();
+        dto.setId(leave.getId());
+        dto.setEmployeeId(leave.getEmployee().getId());
+        dto.setStartDate(leave.getStartDate());
+        dto.setEndDate(leave.getEndDate());
+        dto.setType(leave.getType().name());
+        dto.setStatus(leave.getStatus().name());
+        dto.setReason(leave.getReason());
+        return dto;
+    }
 }

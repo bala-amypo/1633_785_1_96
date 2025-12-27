@@ -24,6 +24,7 @@ public class UserAccount {
     @JoinColumn(name = "employee_profile_id")
     private EmployeeProfile employeeProfile;
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -40,6 +41,7 @@ public class UserAccount {
     public void setEmployeeProfile(EmployeeProfile employeeProfile) { this.employeeProfile = employeeProfile; }
 }
 
-enum UserRole {
+// PUBLIC ENUM
+public enum UserRole {
     ADMIN, HRMANAGER, TEAMLEAD
 }
